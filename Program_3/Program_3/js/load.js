@@ -12,8 +12,10 @@ var loadState = {
 		game.load.spritesheet('mute', 'assets/muteButton.png', 28, 22);
         game.load.image('enemy', 'assets/HILLARY.png');
         game.load.image('coin', 'assets/Vote.png');
-        game.load.image('wallV', 'assets/wallVertical.png');
-        game.load.image('wallH', 'assets/wallHorizontal.png');
+        // Load the tileset information
+		game.load.tilemap('map', 'assets/map.json', null, Phaser.Tilemap.TILED_JSON);
+		game.load.image('tileset', 'assets/tileset.png');
+		
         // Load a new asset that we will use in the menu state
         game.load.image('background', 'assets/background.png');
 		game.load.image('pixel', 'assets/pixel.png');
@@ -30,6 +32,8 @@ var loadState = {
 		game.load.audio('victory', ['assets/Applause-SoundBible.com-151138312.mp3']);
 		
 		game.load.audio('music', ['assets/Hail to the Chief.ogg', 'assets/Hail to the Chief.mp3']);
+		
+		
 		
 		
     },

@@ -64,6 +64,19 @@ var playState = {
 		if (!game.device.desktop) {
 		this.addMobileInputs();
 		}
+		
+		if (!game.device.dekstop) {
+		// Call 'orientationChange' when the device is rotated
+		game.scale.onOrientationChange.add(this.orientationChange, this);
+
+		// Create an empty label to write the error message if needed
+		this.rotateLabel = game.add.text(game.width/2, game.height/2, '',
+		{ font: '30px Arial', fill: '#fff', backgroundColor: '#000' });
+		this.rotateLabel.anchor.setTo(0.5, 0.5);
+
+		// Call the function at least once
+		this.orientationChange();
+		}
     },
 	
 	addMobileInputs: function() {
@@ -113,7 +126,7 @@ var playState = {
 	
 	jumpPlayer: function() {
 		// If the player is touching the ground
-		if (this.player.body.touching.down) {
+		if (this.player.body.onFloor()) {
 			// Jump with sound
 			this.player.body.velocity.y = -320;
 			this.jumpSound.play();
@@ -127,8 +140,9 @@ var playState = {
 	},
 
     update: function() {
-        game.physics.arcade.collide(this.player, this.walls);
-        game.physics.arcade.collide(this.enemies, this.walls);
+        // Replaced 'this.walls' by 'this.layer'
+		game.physics.arcade.collide(this.player, this.layer);
+		game.physics.arcade.collide(this.enemies, this.layer);
         game.physics.arcade.overlap(this.player, this.coin, this.takeCoin, null, this);
         game.physics.arcade.overlap(this.player, this.enemies, this.playerDie, null, this);
 
@@ -146,12 +160,12 @@ var playState = {
 		this.moveLeft = false;
 		this.moveRight = false;
 		}
-		if (this.cursor.left.isDown || 
+		if (this.cursor.left.isDown || game.input.keyboard.isDown(Phaser.Keyboard.A) ||
 		this.moveLeft) { // This is new
 		this.player.body.velocity.x = -200;
 		this.player.animations.play('left');
 		}
-        else if (this.cursor.right.isDown || 
+        else if (this.cursor.right.isDown || game.input.keyboard.isDown(Phaser.Keyboard.D) ||
 		this.moveRight) { // This is new
 		this.player.body.velocity.x = 200;
 		this.player.animations.play('right');
@@ -160,7 +174,7 @@ var playState = {
             this.player.body.velocity.x = 0;
 			this.player.frame = 1;
         }
-		if (this.cursor.up.isDown) {
+		if (this.cursor.up.isDown || game.input.keyboard.isDown(Phaser.Keyboard.W)) {
         this.jumpPlayer();
 		}	
     },
@@ -213,26 +227,23 @@ var playState = {
         enemy.checkWorldBounds = true;
         enemy.outOfBoundsKill = true;
     },
+	
+	createWorld: function() {
+		// Create the tilemap
+		this.map = game.add.tilemap('map');
 
-    createWorld: function() {
-        this.walls = game.add.group();
-        this.walls.enableBody = true;
+		// Add the tileset to the map
+		this.map.addTilesetImage('tileset');
 
-        game.add.sprite(0, 0, 'wallV', 0, this.walls); 
-        game.add.sprite(480, 0, 'wallV', 0, this.walls); 
-        game.add.sprite(0, 0, 'wallH', 0, this.walls); 
-        game.add.sprite(300, 0, 'wallH', 0, this.walls);
-        game.add.sprite(0, 320, 'wallH', 0, this.walls); 
-        game.add.sprite(300, 320, 'wallH', 0, this.walls); 
-        game.add.sprite(-100, 160, 'wallH', 0, this.walls); 
-        game.add.sprite(400, 160, 'wallH', 0, this.walls); 
-        var middleTop = game.add.sprite(100, 80, 'wallH', 0, this.walls);
-        middleTop.scale.setTo(1.5, 1);
-        var middleBottom = game.add.sprite(100, 240, 'wallH', 0, this.walls);
-        middleBottom.scale.setTo(1.5, 1);
+		// Create the layer by specifying the name of the Tiled layer
+		this.layer = this.map.createLayer('Tile Layer 1');
 
-        this.walls.setAll('body.immovable', true);
-    },
+		// Set the world size to match the size of the layer
+		this.layer.resizeWorld();
+
+		// Enable collisions for the first tilset element (the blue wall)
+		this.map.setCollision(1);
+	},
 	
 	orientationChange: function() {
 		// If the game is in portrait (wrong orientation)

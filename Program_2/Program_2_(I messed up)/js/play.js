@@ -61,7 +61,64 @@ var playState = {
 		this.music.loop = true; // Make it loop
 		this.music.play(); // Start the music
 		
+		if (!game.device.desktop) {
+		this.addMobileInputs();
+		}
     },
+	
+	addMobileInputs: function() {
+    // Add the jump button
+    var jumpButton = game.add.sprite(350, 240, 'jumpButton');
+    jumpButton.inputEnabled = true;
+    jumpButton.alpha = 0.5;
+	jumpButton.events.onInputDown.add(this.jumpPlayer, this);
+
+    // Add the move left button
+    var leftButton = game.add.sprite(50, 240, 'leftButton');
+    leftButton.inputEnabled = true;
+    leftButton.alpha = 0.5;
+	leftButton.events.onInputOver.add(this.setLeftTrue, this);
+    leftButton.events.onInputOut.add(this.setLeftFalse, this);
+    leftButton.events.onInputDown.add(this.setLeftTrue, this);
+    leftButton.events.onInputUp.add(this.setLeftFalse, this);
+
+    // Add the move right button
+    var rightButton = game.add.sprite(130, 240, 'rightButton');
+    rightButton.inputEnabled = true;
+    rightButton.alpha = 0.5;
+	rightButton.events.onInputOver.add(this.setRightTrue, this);
+    rightButton.events.onInputOut.add(this.setRightFalse, this);
+    rightButton.events.onInputDown.add(this.setRightTrue, this);
+    rightButton.events.onInputUp.add(this.setRightFalse, this);
+	
+	// Call 'jumpPlayer' when the 'jumpButton' is pressed
+	jumpButton.events.onInputDown.add(this.jumpPlayer, this);
+	},
+	
+	setLeftTrue: function() {
+    this.moveLeft = true;
+	},
+	
+	setLeftFalse: function() {
+    this.moveLeft = false;
+	},
+	
+	setRightTrue: function() {
+    this.moveRight = true;
+	},
+	
+	setRightFalse: function() {
+    this.moveRight = false;
+	},
+	
+	jumpPlayer: function() {
+		// If the player is touching the ground
+		if (this.player.body.touching.down) {
+			// Jump with sound
+			this.player.body.velocity.y = -320;
+			this.jumpSound.play();
+		}
+	},
 	
 	gameTime: function()
 	{
@@ -83,23 +140,29 @@ var playState = {
     },
 
     movePlayer: function() {
-        if (this.cursor.left.isDown) {
-            this.player.body.velocity.x = -200;
-			this.player.animations.play('left');
-        }
-        else if (this.cursor.right.isDown) {
-            this.player.body.velocity.x = 200;
-			this.player.animations.play('right');
-        }
+		// If 0 finger are touching the screen
+		if (game.input.totalActivePointers == 0) {
+		// Make sure the player is not moving
+		this.moveLeft = false;
+		this.moveRight = false;
+		}
+		if (this.cursor.left.isDown || 
+		this.moveLeft) { // This is new
+		this.player.body.velocity.x = -200;
+		this.player.animations.play('left');
+		}
+        else if (this.cursor.right.isDown || 
+		this.moveRight) { // This is new
+		this.player.body.velocity.x = 200;
+		this.player.animations.play('right');
+		}
         else {
             this.player.body.velocity.x = 0;
 			this.player.frame = 1;
         }
-
-        if (this.cursor.up.isDown && this.player.body.touching.down) {
-			this.jumpSound.play();
-            this.player.body.velocity.y = -320;
-        }      
+		if (this.cursor.up.isDown) {
+        this.jumpPlayer();
+		}	
     },
 
     takeCoin: function(player, coin) {
@@ -170,6 +233,21 @@ var playState = {
 
         this.walls.setAll('body.immovable', true);
     },
+	
+	orientationChange: function() {
+		// If the game is in portrait (wrong orientation)
+		if (game.scale.isPortrait) {
+			// Pause the game and add a text explanation
+			game.paused = true;
+			this.rotateLabel.text = 'rotate your device in landscape';
+		}
+		// If the game is in landscape (good orientation)
+		else {
+			// Resume the game and remove the text
+			game.paused = false;
+			this.rotateLabel.text = '';
+		}
+	},
 	
 	startMenu: function() {
     game.state.start('menu');
