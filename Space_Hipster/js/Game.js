@@ -121,10 +121,11 @@ SpaceHipster.Game.prototype = {
 
         if (bullet)
         {
-			//  And fire it
-            bullet.reset(this.player.x, this.player.y);
-            bullet.body.velocity.y = -400;
-            SpaceHipster.global.bulletTime = this.game.time.now + 500;
+			bullet.reset(this.player.x + 16, this.player.y + 16);
+            bullet.lifespan = 2000;
+            bullet.rotation = this.player.rotation;
+            this.game.physics.arcade.velocityFromRotation(this.player.rotation, 400, bullet.body.velocity);
+            SpaceHipster.global.bulletTime = this.game.time.now + 500
         }
     }
   },
