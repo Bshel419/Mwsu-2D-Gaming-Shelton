@@ -110,8 +110,6 @@ SpaceHipster.Game.prototype = {
     //overlapping between player and collectables
     this.game.physics.arcade.overlap(this.player, this.collectables, this.collect, null, this);
 	this.game.physics.arcade.overlap(this.bullets, this.asteroids, this.bulletCollision, null, this);
-	
-	this.angleLabel.text = 'Angle:' + this.player.rotation;
   },
   
   shootBullet: function() {
@@ -124,7 +122,7 @@ SpaceHipster.Game.prototype = {
         if (bullet)
         {
 			//  And fire it
-			bullet.reset(this.player.x, this.player.y);
+            bullet.reset(this.player.x, this.player.y);
             bullet.body.velocity.y = -400;
             SpaceHipster.global.bulletTime = this.game.time.now + 500;
         }
@@ -235,8 +233,6 @@ SpaceHipster.Game.prototype = {
     var style = { font: "20px Arial", fill: "#fff", align: "center" };
     this.scoreLabel = this.game.add.text(this.game.width-50, this.game.height - 50, text, style);
     this.scoreLabel.fixedToCamera = true;
-	this.angleLabel = this.game.add.text(this.width-100, this.game.height - 100, 'angle:' + this.player.angle, style);
-	this.angleLabel.fixedToCamera = true;
   }
 };
 
